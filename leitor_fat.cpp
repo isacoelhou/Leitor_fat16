@@ -99,6 +99,8 @@ int main()
     }
 
     printf("\n\n================ CONTEÚDO DO ARQUIVO: ======================\n\n");
+    printf("\n\n======== CONTEÚDO DO ULTIMO ARQUIVO DO ROOT DIR: ===========\n\n");
+
 
 
     std::vector <short int> clusters;
@@ -111,8 +113,6 @@ int main()
         fread(&acesso_atual, 2,1, fp);     
     }
     
-    // vai em dados + (cluster[i] - 2) *  bytes_per_Sector * setor_per_cluster e começa a ler
-    // le até o fim do cluster byte a byte
 
     char temp;
     int j;
