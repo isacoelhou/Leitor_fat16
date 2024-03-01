@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void boot_recorder (){}
+
 int main()
 {
 
@@ -11,7 +13,7 @@ int main()
     fp = fopen("./fat16_1sectorpercluster.img", "rb");
 
     fseek(fp, 11, SEEK_SET);
-    fread(&bytes_per_sector,2,1, fp);
+    fread(&bytes_per_sector, 2,1, fp);
 
     fseek(fp, 13, SEEK_SET);
     fread(&sector_per_cluster, 1,1,fp);
@@ -48,6 +50,24 @@ int main()
     printf("FAT2 começa no setor %d, endereço %d\n", FAT2, FAT2*512);
     printf("Root dir começa no setor %d, endereço %d\n", root_dir ,root_dir*512);
     printf("A área de dados começa no setor %d, endereço %d\n", data, data*512);
+
+
+    short int first_cluster;
+    unsigned char LFN;
+    int size;
+    char file_name[11];
+    int entry_number = 0;
+
+    while(1){
+    fseek(fp, (root_dir*512)+(entry_number*16), SEEK_SET);
+
+    for(int i = 0; i < 12; i++){
+        fread(&file_name[i],1,1, fp);
+    }
+
+
+
+    }
 
 
     fclose(fp);
