@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
+#include <math.h>
 
-void boot_recorder (){}
 
 int main()
 {
-
     FILE *fp;
     short int bytes_per_sector, directory_entries, reserved_sectors , sector_per_fat;
     unsigned char sector_per_cluster, number_of_fat;
@@ -59,44 +59,73 @@ int main()
     char file_name[12];
     int entry_number = 0;
     char tipo[15];
+    int tamanho_arquivo;
+    int arquivo_fc;
+    char nome_arquivo[12];
 
     printf("============== INFORMAÇÕES VÁLIDAS DO ROOT DIR:============\n");
 
     while(1){
-    fseek(fp, (root_dir*bytes_per_sector)+(entry_number*32), SEEK_SET);
-    fread(&file_name, 12,1, fp);
-    entry_number++;
+        fseek(fp, (root_dir*bytes_per_sector)+(entry_number*32), SEEK_SET);
+        fread(&file_name, 12,1, fp);
+        entry_number++;
 
-    if (file_name[11] == 15)
-        continue;
-    
-    if (file_name[0] == -27)
-        continue;
-    
-    if (file_name[0] == 0)
-        break;
+        if (file_name[11] == 15 || file_name[0] == -27)
+            continue;
 
-    fseek(fp,(((root_dir*bytes_per_sector)+((entry_number-1)*32))+26), SEEK_SET);
-    fread(&first_cluster, 2,1, fp);
+        if (file_name[0] == 0)
+            break;
 
-    fseek(fp,(((root_dir*bytes_per_sector)+((entry_number-1)*32))+28), SEEK_SET);
-    fread(&size, 4,1, fp); 
+        fseek(fp,(((root_dir*bytes_per_sector)+((entry_number-1)*32))+26), SEEK_SET);
+        fread(&first_cluster, 2,1, fp);
 
-    file_name[11] = 0;
-    printf("\nNome: %s\n", file_name);
-    printf("Primeiro: %hd\n", first_cluster);
-    printf("Tamanho: %d\n", size);
+        fseek(fp,(((root_dir*bytes_per_sector)+((entry_number-1)*32))+28), SEEK_SET);
+        fread(&size, 4,1, fp); 
 
-    if (file_name[11] == 32)
-        strcpy(tipo, "arquivo");
-    else 
-        strcpy(tipo, "diretório");
-    printf("Tipo: %s\n", tipo);
+
+        printf("\nNome: %s\n", file_name);
+        printf("Primeiro cluster: %hd\n", first_cluster);
+        printf("Tamanho: %d\n", size);
+
+        if (file_name[11] == 32){
+            printf("Tipo: arquivo\n");
+            tamanho_arquivo = size;
+            arquivo_fc = first_cluster;
+            strcpy(nome_arquivo, file_name);
+        }
+        else 
+            printf("Tipo: diretório\n");
 
     }
 
-    printf("\n\n================ CONTEÚDO DO ARQUIVO:======================\n\n");
+    printf("\n\n================ CONTEÚDO DO ARQUIVO: ======================\n\n");
 
+
+    std::vector <short int> clusters;
+
+    short int acesso_atual = arquivo_fc;
+
+    while(acesso_atual != -1){
+        clusters.push_back(acesso_atual);
+        fseek(fp,(FAT1*bytes_per_sector + 2*acesso_atual), SEEK_SET);
+        fread(&acesso_atual, 2,1, fp);     
+    }
+    
+    // vai em dados + (cluster[i] - 2) *  bytes_per_Sector * setor_per_cluster e começa a ler
+    // le até o fim do cluster byte a byte
+
+    char temp;
+    int j;
+    for(const auto &i : clusters){
+        j = 0;
+    do{
+        fseek(fp,((data+i-2) * (bytes_per_sector*sector_per_cluster))+j, SEEK_SET);
+        fread(&temp, 1,1, fp);    
+        printf("%c", temp);
+        j++;
+    }
+    while(j < bytes_per_sector*sector_per_cluster || temp == 0);}
+    
 
     fclose(fp);
 
