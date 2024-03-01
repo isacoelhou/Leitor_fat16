@@ -31,7 +31,7 @@ int main()
     fseek(fp, 14, SEEK_SET);
     fread(&reserved_sectors ,2,1, fp);
 
-    printf("============== DADOS DO BOOT RECORD: ==============\n\n");
+    printf("================== DADOS DO BOOT RECORD: ==================\n\n");
     printf("Bytes por sector: %hd \n", bytes_per_sector);
     printf("Número de entradas no diretório raiz: %hd \n", directory_entries);
     printf("Número de setores reservados: %hd \n", reserved_sectors );
@@ -45,7 +45,8 @@ int main()
     int root_dir = FAT2 + sector_per_fat;
     int data = root_dir + ((directory_entries * 32)/ bytes_per_sector);
 
-    printf("\n\n============== ORGANIZAÇÃO DA FAT: ==============\n\n");
+    printf("\n\n==================== ORGANIZAÇÃO DA FAT: ==================\n\n");
+
 
     printf("FAT1 começa no setor %d, endereço %d\n", FAT1 ,FAT1*512);
     printf("FAT2 começa no setor %d, endereço %d\n", FAT2, FAT2*512);
@@ -59,7 +60,7 @@ int main()
     int entry_number = 0;
     char tipo[15];
 
-    printf("============== INFORMAÇÕES VÁLIDAS DO ROOT DIR:===============\n");
+    printf("============== INFORMAÇÕES VÁLIDAS DO ROOT DIR:============\n");
 
     while(1){
     fseek(fp, (root_dir*bytes_per_sector)+(entry_number*32), SEEK_SET);
@@ -75,24 +76,26 @@ int main()
     if (file_name[0] == 0)
         break;
 
-    if (file_name[11] == 32)
-        strcpy(tipo, "arquivo");
-    else 
-        strcpy(tipo, "diretório");
- 
     fseek(fp,(((root_dir*bytes_per_sector)+((entry_number-1)*32))+26), SEEK_SET);
     fread(&first_cluster, 2,1, fp);
 
     fseek(fp,(((root_dir*bytes_per_sector)+((entry_number-1)*32))+28), SEEK_SET);
     fread(&size, 4,1, fp); 
+
+    file_name[11] = 0;
     printf("\nNome: %s\n", file_name);
     printf("Primeiro: %hd\n", first_cluster);
     printf("Tamanho: %d\n", size);
+
+    if (file_name[11] == 32)
+        strcpy(tipo, "arquivo");
+    else 
+        strcpy(tipo, "diretório");
     printf("Tipo: %s\n", tipo);
 
     }
 
-    printf("\n\n============== CONTEÚDO DO ARQUIVO ==================\n\n");
+    printf("\n\n================ CONTEÚDO DO ARQUIVO:======================\n\n");
 
 
     fclose(fp);
