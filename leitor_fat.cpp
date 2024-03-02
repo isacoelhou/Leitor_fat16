@@ -63,9 +63,9 @@ int main()
     int arquivo_fc;
     char nome_arquivo[12];
 
-    printf("============== INFORMAÇÕES VÁLIDAS DO ROOT DIR:============\n");
+     printf("============== INFORMAÇÕES VÁLIDAS DO ROOT DIR:============\n");
 
-    while(1){
+     while(1){
         fseek(fp, (root_dir*bytes_per_sector)+(entry_number*32), SEEK_SET);
         fread(&file_name, 12,1, fp);
         entry_number++;
@@ -87,25 +87,20 @@ int main()
         printf("Primeiro cluster: %hd\n", first_cluster);
         printf("Tamanho: %d\n", size);
 
-        if (file_name[11] == 32){
-            printf("Tipo: arquivo\n");
-            tamanho_arquivo = size;
-            arquivo_fc = first_cluster;
-            strcpy(nome_arquivo, file_name);
-        }
-        else 
-            printf("Tipo: diretório\n");
+         if (file_name[11] == 32){
+             printf("Tipo: arquivo\n");
+             tamanho_arquivo = size;
+             arquivo_fc = first_cluster;
+         }
+         else 
+             printf("Tipo: diretório\n");
+     }
 
-    }
-
-    printf("\n\n================ CONTEÚDO DO ARQUIVO: ======================\n\n");
     printf("\n\n======== CONTEÚDO DO ULTIMO ARQUIVO DO ROOT DIR: ===========\n\n");
 
+     std::vector <short int> clusters;
 
-
-    std::vector <short int> clusters;
-
-    short int acesso_atual = arquivo_fc;
+     short int acesso_atual = arquivo_fc;
 
     while(acesso_atual != -1){
         clusters.push_back(acesso_atual);
@@ -118,13 +113,17 @@ int main()
     int j;
     for(const auto &i : clusters){
         j = 0;
-    do{
-        fseek(fp,((data+i-2) * (bytes_per_sector*sector_per_cluster))+j, SEEK_SET);
-        fread(&temp, 1,1, fp);    
+     do{
+        fseek(fp, ((data + ((i-2) * sector_per_cluster)) * bytes_per_sector)+j, SEEK_SET);
+        fread(&temp, 1,1, fp);
         printf("%c", temp);
         j++;
+         if (temp == 0)
+            break;
+     }
+    while(j < bytes_per_sector*sector_per_cluster);
     }
-    while(j < bytes_per_sector*sector_per_cluster || temp == 0);}
+    
     
 
     fclose(fp);
