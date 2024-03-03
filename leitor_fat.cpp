@@ -10,7 +10,7 @@ int main()
     short int bytes_per_sector, directory_entries, reserved_sectors , sector_per_fat;
     unsigned char sector_per_cluster, number_of_fat;
 
-    fp = fopen("./fat16_4sectorpercluster.img", "rb");
+    fp = fopen("./fat16_1sectorpercluster.img", "rb");
 
     fseek(fp, 11, SEEK_SET);
     fread(&bytes_per_sector, 2,1, fp);
@@ -54,7 +54,7 @@ int main()
     printf("Root dir começa no setor %d, endereço %d\n", root_dir ,root_dir*512);
     printf("A área de dados começa no setor %d, endereço %d\n\n\n", data, data*512);
 
-    short int first_cluster;
+    short int first_cluster, n_arquivo = 0;
     char file_name[12];
     int entry_number = 0, tamanho_arquivo, arquivo_fc, size;
 
@@ -84,14 +84,17 @@ int main()
 
         if (file_name[11] == 32){
             printf("Tipo: arquivo\n");
-            tamanho_arquivo = size;
-            arquivo_fc = first_cluster;
+            if (n_arquivo == 0){
+                tamanho_arquivo = size;
+                arquivo_fc = first_cluster;
+                n_arquivo++;
+            }
          }
         else 
             printf("Tipo: diretório\n");
      }
 
-    printf("\n\n======== CONTEÚDO DO ULTIMO ARQUIVO DO ROOT DIR: ===========\n\n");
+    printf("\n\n======= CONTEÚDO DO PRIMEIRO ARQUIVO DO ROOT DIR: ==========\n\n");
 
     std::vector <short int> clusters;
     short int acesso_atual = arquivo_fc;
